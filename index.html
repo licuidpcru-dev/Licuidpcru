@@ -359,7 +359,6 @@
 </head>
 <body>
 
-    <!-- BOOT LOADER SECTION -->
     <div id="boot-screen">
         <div class="boot-logo">LIQUID-PC</div>
         <div class="progress-container">
@@ -369,10 +368,8 @@
         <div class="fact-box" id="fact-display">Загрузка данных...</div>
     </div>
 
-    <!-- AUTH SCREEN -->
     <div id="auth-screen">
         <div class="auth-card">
-            <!-- Form: Login -->
             <div id="login-form" class="auth-form active">
                 <h2 style="margin-bottom: 10px; font-weight: 900;">WELCOME BACK</h2>
                 <p style="opacity: 0.5; font-size: 14px; margin-bottom: 30px;">Авторизация в системе</p>
@@ -387,7 +384,6 @@
                 </p>
             </div>
 
-            <!-- Form: Register -->
             <div id="register-form" class="auth-form">
                 <h2 style="margin-bottom: 10px; font-weight: 900;">JOIN ELITE</h2>
                 <p style="opacity: 0.5; font-size: 14px; margin-bottom: 30px;">Регистрация нового аккаунта</p>
@@ -405,7 +401,6 @@
         </div>
     </div>
 
-    <!-- MAIN APP CONTENT -->
     <div id="app-content">
         <header>
             <div class="header-logo" onclick="location.reload()">LIQUID-PC</div>
@@ -450,7 +445,6 @@
         </main>
     </div>
 
-    <!-- SIDE PANELS -->
     <div id="cart-panel" class="side-panel">
         <div class="panel-close" onclick="closePanels()">← НАЗАД</div>
         <h2 style="margin-bottom:30px;">КОРЗИНА</h2>
@@ -586,4 +580,9 @@
         }
 
         function closePanels() {
-            document.querySelectorAl
+            const panels = document.querySelectorAll('.side-panel');
+            panels.forEach(p => p.classList.remove('open'));
+        }
+    </script>
+</body>
+</html>
