@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Builder | Liquid-PC</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap');
+
+        :root {
+            --bg: #000000;
+            --accent: #00f0ff;
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-hover: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.1);
+            --error: #ff3b30;
+            --success: #34c759;
+            --apple-ease: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: #fff; min-height: 100vh; overflow-x: hidden; opacity: 0; transition: opacity 1s ease; }
+        body.loaded { opacity: 1; }
+
+        /* --- LOADER --- */
+        #loader {
+            position: fixed; inset: 0; background: #000; z-index: 10000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        #loader.hidden { transform: translateY(-100%); transition: 0.8s var(--apple-ease); }
+        .loader-bar { width: 280px; height: 2px; background: rgba(255,255,255,0.1); position: relative; overflow: hidden; margin-top: 20px; }
+        .loader-progress { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); width: 0%; transition: 0.4s; }
+        .loader-text { font-size: 10px; font-weight: 900; letter-spacing: 5px; color: var(--accent); text-transform: uppercase; }
+
+        /* --- HEADER --- */
+        header {
+            position: fixed; top: 0; width: 100%; height: 80px; padding: 0 5%;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(30px); z-index: 999;
+            border-bottom: 1px solid var(--border);
+        }
+        .header-logo { font-weight: 900; font-size: 22px; letter-spacing: 2px; text-decoration: none; color: #fff; }
+        nav { display: flex; gap: 30px; }
+        nav a { color: rgba(255, 255, 255, 0.5); text-decoration: none; font-size: 13px; font-weight: 600; text-transform: uppercase; transition: 0.3s; }
+        nav a.active { color: var(--accent); }
+
+        /* --- CONTENT --- */
+        .container { max-width: 1400px; margin: 0 auto; padding: 140px 5% 100px; }
+        .builder-layout { display: grid; grid-template-columns: 1fr 420px; gap: 40px; align-items: start; }
+        .config-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+        .custom-select-container { margin-bottom: 10px; position: relative; }
+        .category-label { font-size: 10px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; display: block; padding-left: 4px; }
+        
+        .select-trigger {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 22px; border-radius: 18px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: 0.3s; font-size: 14px; color: #fff; font-weight: 500;
+        }
+        .select-trigger:hover { border-color: var(--accent); background: var(--surface-hover); }
+        .select-trigger.active { border-color: var(--accent); background: rgba(0, 240, 255, 0.05); }
+
+        .options-list {
+            position: absolute; top: calc(100% + 10px); left: 0; width: 100%;
+            background: #0a0a0a; border: 1px solid var(--border);
+            border-radius: 20px; z-index: 100; overflow: hidden;
+            max-height: 0; transition: max-height 0.4s var(--apple-ease);
+        }
+        .options-list.open { max-height: 500px; overflow-y: auto; border-color: var(--accent); box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
+
+        .option {
+            padding: 16px 24px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03);
+            display: flex; justify-content: space-between; align-items: center; transition: 0.2s;
+        }
+        .option:hover { background: var(--accent); color: #000; }
+        .opt-price { font-size: 12px; font-weight: 700; opacity: 0.8; }
+
+        /* --- SUMMARY --- */
+        .summary-card {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 40px; border-radius: 40px; position: sticky; top: 120px;
+            backdrop-filter: blur(20px);
+        }
+        .total-price { font-size: 56px; font-weight: 900; color: var(--accent); margin-bottom: 10px; letter-spacing: -3px; }
+
+        .compatibility-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 14px; border-radius: 18px; font-size: 11px;
+            font-weight: 800; text-transform: uppercase; margin-bottom: 25px;
+            width: 100%; justify-content: center; text-align: center;
+        }
+        .comp-ok { background: rgba(52, 199, 89, 0.1); color: var(--success); border: 1px solid var(--success); }
+        .comp-err { background: rgba(255, 59, 48, 0.1); color: var(--error); border: 1px solid var(--error); }
+
+        .add-btn {
+            width: 100%; padding: 24px; background: var(--accent); color: #000;
+            border: none; border-radius: 22px; font-weight: 900; cursor: pointer; transition: 0.4s;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .add-btn:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 0 30px rgba(0, 240, 255, 0.3); }
+
+        @media (max-width: 1100px) {
+            .builder-layout { grid-template-columns: 1fr; }
+            .config-sections { grid-template-columns: 1fr; }
+        }
+
+        .options-list::-webkit-scrollbar { width: 4px; }
+        .options-list::-webkit-scrollbar-track { background: transparent; }
+        .options-list::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="loader-text" id="loader-status">СИНХРОНИЗАЦИЯ С БАЗОЙ ДАННЫХ...</div>
+        <div class="loader-bar"><div class="loader-progress" id="p-bar"></div></div>
+    </div>
+
+    <header>
+        <a href="index.html" class="header-logo">LIQUID-PC</a>
+        <nav>
+            <a href="systems.html">SYSTEMS</a>
+            <a href="builder.html" class="active">BUILDER</a>
+            <a href="store.html">STORE</a>
+            <a href="account.html">ACCOUNT</a>
+        </nav>
+        <div id="cart-counter" style="background: var(--accent); color:#000; padding: 5px 15px; border-radius: 20px; font-size: 11px; font-weight: 900;">CART: 0</div>
+    </header>
+
+    <main class="container">
+        <h1 style="font-size: 64px; font-weight: 900; letter-spacing: -4px; margin-bottom: 20px;">BUILDER</h1>
+        
+        <div class="builder-layout">
+            <div class="config-sections" id="builder-grid"></div>
+
+            <div class="summary-card">
+                <span style="font-size: 11px; opacity: 0.5; letter-spacing: 2px;">РАСЧЕТНАЯ СТОИМОСТЬ</span>
+                <div class="total-price" id="total-display">0 ₽</div>
+                
+                <div id="comp-status" class="compatibility-badge comp-ok">
+                    <span id="comp-text">Анализ...</span>
+                </div>
+
+                <button class="add-btn" id="add-to-cart-btn" onclick="addToCart()">В корзину</button>
+                <p style="font-size: 10px; opacity: 0.3; text-align: center; margin-top: 15px;">Премиум сборка Liquid: 15 000 ₽</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Применяем наценку 5%
+        const PROFIT_MARGIN = 1.05;
+        const ASSEMBLY_FEE = 15000;
+
+        const components = {
+            cpu: {
+                label: "Процессор",
+                items: [
+                    { name: "Intel Core Ultra 9 285K", price: 82000, socket: 'LGA1851', ramType: 'DDR5' },
+                    { name: "AMD Ryzen 9 9950X", price: 74000, socket: 'AM5', ramType: 'DDR5' },
+                    { name: "AMD Ryzen 9 9950X3D", price: 92000, socket: 'AM5', ramType: 'DDR5' },
+                    { name: "Intel Core Ultra 7 265K", price: 54000, socket: 'LGA1851', ramType: 'DDR5' },
+                    { name: "AMD Ryzen 7 9800X3D", price: 61000, socket: 'AM5', ramType: 'DDR5' },
+                    { name: "Intel Core i9-14900KS", price: 88000, socket: 'LGA1700', ramType: 'DDR5' },
+                    { name: "AMD Threadripper 7995WX", price: 1150000, socket: 'sTR5', ramType: 'DDR5' },
+                    { name: "Intel Xeon w9-3495X", price: 720000, socket: 'LGA4677', ramType: 'DDR5' },
+                    { name: "Intel Core Ultra 5 245K", price: 38000, socket: 'LGA1851', ramType: 'DDR5' },
+                    { name: "AMD Ryzen 9 7950X3D", price: 69000, socket: 'AM5', ramType: 'DDR5' },
+                    { name: "AMD Ryzen 7 9700X", price: 44000, socket: 'AM5', ramType: 'DDR5' },
+                    { name: "Intel Core i7-14700K", price: 49000, socket: 'LGA1700', ramType: 'DDR5' },
+                    { name: "AMD Ryzen 5 9600X", price: 32000, socket: 'AM5', ramType: 'DDR5' },
+                    { name: "Intel Core i5-14600K", price: 35000, socket: 'LGA1700', ramType: 'DDR5' },
+                    { name: "AMD Ryzen 9 5950X", price: 42000, socket: 'AM4', ramType: 'DDR4' },
+                    { name: "AMD Ryzen 7 5800X3D", price: 36000, socket: 'AM4', ramType: 'DDR4' },
+                    { name: "Intel Core i9-12900K", price: 38000, socket: 'LGA1700', ramType: 'DDR5' },
+                    { name: "AMD Ryzen 5 7600X", price: 23000, socket: 'AM5', ramType: 'DDR5' },
+                    { name: "Intel Core i5-13400F", price: 19000, socket: 'LGA1700', ramType: 'DDR4' },
+                    { name: "AMD Ryzen 7 5700X", price: 17500, socket: 'AM4', ramType: 'DDR4' }
+                ]
+            },
+            gpu: {
+                label: "Видеокарта",
+                items: [
+                    { name: "NVIDIA GeForce RTX 5090 (32GB)", price: 395000, psuReq: 1000 },
+                    { name: "NVIDIA GeForce RTX 5080 (16GB)", price: 185000, psuReq: 850 },
+                    { name: "NVIDIA GeForce RTX 5070 Ti", price: 112000, psuReq: 750 },
+                    { name: "NVIDIA GeForce RTX 4090 (24GB)", price: 265000, psuReq: 1000 },
+                    { name: "AMD Radeon RX 7900 XTX", price: 122000, psuReq: 850 },
+                    { name: "NVIDIA GeForce RTX 5070 (12GB)", price: 89000, psuReq: 650 },
+                    { name: "NVIDIA GeForce RTX 4080 Super", price: 135000, psuReq: 850 },
+                    { name: "AMD Radeon RX 8800 XT", price: 92000, psuReq: 700 },
+                    { name: "NVIDIA GeForce RTX 4070 Ti Super", price: 96000, psuReq: 750 },
+                    { name: "NVIDIA GeForce RTX 4070 Super", price: 78000, psuReq: 650 },
+                    { name: "AMD Radeon RX 7900 XT", price: 94000, psuReq: 750 },
+                    { name: "NVIDIA GeForce RTX 4060 Ti 16GB", price: 58000, psuReq: 550 },
+                    { name: "NVIDIA TITAN Ada Generation", price: 440000, psuReq: 1000 },
+                    { name: "NVIDIA RTX A6000 (48GB)", price: 595000, psuReq: 850 },
+                    { name: "AMD Radeon PRO W7900", price: 460000, psuReq: 850 },
+                    { name: "ASUS ROG Strix RTX 5090 White", price: 425000, psuReq: 1000 },
+                    { name: "MSI GeForce RTX 5080 Suprim X", price: 198000, psuReq: 850 },
+                    { name: "GIGABYTE RTX 5070 EAGLE OC", price: 92000, psuReq: 650 },
+                    { name: "NVIDIA GeForce RTX 4060", price: 38000, psuReq: 500 },
+                    { name: "AMD Radeon RX 7600 XT", price: 34000, psuReq: 550 }
+                ]
+            },
+            mboard: {
+                label: "Материнская плата",
+                items: [
+                    { name: "ROG Maximus Z890 Extreme", price: 124000, socket: 'LGA1851', ramType: 'DDR5' },
+                    { name: "MSI MEG X870E GODLIKE", price: 168000, socket: 'AM5', ramType: 'DDR5' },
+                    { name: "ROG Maximus Z890 Hero", price: 86000, socket: 'LGA1851', ramType: 'DDR5' },
+                    { name: "ROG Crosshair X870E Hero", price: 92000, socket: 'AM5', ramType: 'DDR5' },
+                    { name: "ASUS ProArt Z890-CREATOR WIFI", price: 68000, socket: 'LGA1851', ramType: 'DDR5' },
+                    { name: "Gigabyte Z890 Aorus Master", price: 62000, socket: 'LGA1851', ramType: 'DDR5' },
+                    { name: "ASRock X870E Taichi", price: 65000, socket: 'AM5', ramType: 'DDR5' },
+                    { name: "ASUS TUF Gaming X870-PLUS", price: 38000, socket: 'AM5', ramType: 'DDR5' },
+                    { name: "MSI MAG Z890 Tomahawk WIFI", price: 34000, socket: 'LGA1851', ramType: 'DDR5' },
+                    { name: "ROG Strix Z790-E Gaming II", price: 58000, socket: 'LGA1700', ramType: 'DDR5' },
+                    { name: "ASRock Z790 Taichi Lite", price: 41000, socket: 'LGA1700', ramType: 'DDR5' },
+                    { name: "Gigabyte Z790 Aorus Elite X", price: 29000, socket: 'LGA1700', ramType: 'DDR5' },
+                    { name: "ASUS Pro WS W790-ACE", price: 115000, socket: 'LGA4677', ramType: 'DDR5' },
+                    { name: "ASUS ROG Zenith II Extreme", price: 98000, socket: 'sTRX4', ramType: 'DDR4' },
+                    { name: "MSI MPG B650 Carbon WIFI", price: 28000, socket: 'AM5', ramType: 'DDR5' },
+                    { name: "Gigabyte B550 Vision D", price: 19000, socket: 'AM4', ramType: 'DDR4' },
+                    { name: "ASUS ROG STRIX B760-I (ITX)", price: 24000, socket: 'LGA1700', ramType: 'DDR5' },
+                    { name: "MSI MPG X570S Carbon", price: 31000, socket: 'AM4', ramType: 'DDR4' },
+                    { name: "Gigabyte X670E Aorus Pro X", price: 44000, socket: 'AM5', ramType: 'DDR5' },
+                    { name: "EVGA Z790 DARK K|NGP|N", price: 105000, socket: 'LGA1700', ramType: 'DDR5' }
+                ]
+            },
+            ram: {
+                label: "Оперативная память",
+                items: [
+                    { name: "64GB DDR5 8000MHz (2x32) G.Skill", price: 68000, ramType: 'DDR5' },
+                    { name: "32GB DDR5 6000MHz (2x16) CL30", price: 19500, ramType: 'DDR5' },
+                    { name: "96GB DDR5 6400MHz (2x48) Corsair", price: 62000, ramType: 'DDR5' },
+                    { name: "128GB DDR5 6000MHz (4x32)", price: 88000, ramType: 'DDR5' },
+                    { name: "32GB DDR5 Dominator Titanium 7200", price: 34000, ramType: 'DDR5' },
+                    { name: "48GB DDR5 8200MHz (2x24) TeamGroup", price: 52000, ramType: 'DDR5' },
+                    { name: "64GB DDR5 Royal Z5 Silver", price: 48000, ramType: 'DDR5' },
+                    { name: "16GB DDR5 5200MHz Crucial", price: 9500, ramType: 'DDR5' },
+                    { name: "256GB DDR5 LRDIMM (Server)", price: 360000, ramType: 'DDR5' },
+                    { name: "32GB DDR5 Fury Renegade 8000", price: 31000, ramType: 'DDR5' },
+                    { name: "64GB DDR4 3600MHz CL16 (2x32)", price: 22000, ramType: 'DDR4' },
+                    { name: "32GB DDR4 3600MHz CL18", price: 11000, ramType: 'DDR4' },
+                    { name: "16GB DDR4 3200MHz G.Skill", price: 6500, ramType: 'DDR4' },
+                    { name: "128GB DDR4 3200MHz Quad Kit", price: 48000, ramType: 'DDR4' },
+                    { name: "32GB DDR4 Dominator Platinum", price: 18000, ramType: 'DDR4' },
+                    { name: "64GB DDR4 Ballistix Max 4400", price: 42000, ramType: 'DDR4' },
+                    { name: "32GB DDR5 Vengeance RGB 6000", price: 24000, ramType: 'DDR5' },
+                    { name: "16GB DDR4 Trident Z Royal Gold", price: 15000, ramType: 'DDR4' },
+                    { name: "64GB DDR5 Mushkin Redline", price: 38000, ramType: 'DDR5' },
+                    { name: "32GB DDR5 Kingston FURY Beast", price: 18500, ramType: 'DDR5' }
+                ]
+            },
+            psu: {
+                label: "Блок питания",
+                items: [
+                    { name: "1600W Corsair AX1600i Digital", price: 78000, watt: 1600 },
+                    { name: "1200W ASUS ROG Thor II Platinum", price: 44000, watt: 1200 },
+                    { name: "2000W Cooler Master Platinum", price: 92000, watt: 2000 },
+                    { name: "1000W Corsair RM1000e ATX 3.0", price: 21000, watt: 1000 },
+                    { name: "1500W be quiet! Dark Power Pro 13", price: 65000, watt: 1500 },
+                    { name: "1350W Thermaltake Toughpower GF3", price: 48000, watt: 1350 },
+                    { name: "1000W MSI MEG Ai1000P PCIE5", price: 34000, watt: 1000 },
+                    { name: "850W Seasonic Prime TX-850", price: 38000, watt: 850 },
+                    { name: "850W ROG Loki SFX-L White", price: 32000, watt: 850 },
+                    { name: "750W Corsair SF750 Platinum", price: 24000, watt: 750 },
+                    { name: "1000W SuperFlower Leadex VII", price: 28000, watt: 1000 },
+                    { name: "1200W FSP Hydro Ti Pro", price: 39000, watt: 1200 },
+                    { name: "850W DeepCool PX850G", price: 16000, watt: 850 },
+                    { name: "750W EVGA SuperNOVA G7", price: 14000, watt: 750 },
+                    { name: "1000W Phanteks Revolt (Cables separately)", price: 26000, watt: 1000 },
+                    { name: "1600W EVGA SuperNOVA P+", price: 52000, watt: 1600 },
+                    { name: "650W Fractal Ion Gold", price: 11000, watt: 650 },
+                    { name: "1000W SilverStone Nightjar (Fanless)", price: 44000, watt: 1000 },
+                    { name: "2500W Server Power Unit", price: 155000, watt: 2500 },
+                    { name: "850W NZXT C850 Gold", price: 17000, watt: 850 }
+                ]
+            }
+        };
+
+        let selections = {};
+
+        function startLoading() {
+            const bar = document.getElementById('p-bar');
+            const status = document.getElementById('loader-status');
+            const steps = [
+                { p: 25, t: "СКАНИРОВАНИЕ ЦЕН DNS И РЕГАРД..." },
+                { p: 50, t: "ПРИМЕНЕНИЕ КОЭФФИЦИЕНТА LIQUID (105%)..." },
+                { p: 75, t: "ПРОВЕРКА НАЛИЧИЯ RTX 5090..." },
+                { p: 100, t: "ДОСТУП РАЗРЕШЕН" }
+            ];
+
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i >= steps.length) {
+                    clearInterval(interval);
+                    document.getElementById('loader').classList.add('hidden');
+                    document.body.classList.add('loaded');
+                    return;
+                }
+                bar.style.width = steps[i].p + '%';
+                status.innerText = steps[i].t;
+                i++;
+            }, 600);
+        }
+
+        function init() {
+            const grid = document.getElementById('builder-grid');
+            grid.innerHTML = '';
+            for (let cat in components) {
+                grid.innerHTML += `
+                    <div class="custom-select-container">
+                        <span class="category-label">${components[cat].label}</span>
+                        <div class="select-trigger" onclick="toggle('${cat}')" id="trig-${cat}">Выбор...</div>
+                        <div class="options-list" id="list-${cat}">
+                            ${components[cat].items.map((it, idx) => `
+                                <div class="option" onclick="selectItem('${cat}', ${idx})">
+                                    <span style="font-weight:600">${it.name}</span>
+                                    <span class="opt-price">${Math.ceil(it.price * PROFIT_MARGIN).toLocaleString()} ₽</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            generateDefaultBu

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Systems | Liquid-PC</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap');
+
+        :root {
+            --bg: #000000;
+            --accent: #00f0ff;
+            --surface: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --apple-ease: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            padding-top: 100px;
+            min-height: 100vh;
+        }
+
+        /* --- НАВИГАЦИЯ --- */
+        header {
+            position: fixed;
+            top: 0; width: 100%; height: 80px;
+            padding: 0 5%;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            z-index: 999;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-logo {
+            font-weight: 900; font-size: 20px; letter-spacing: 2px;
+            text-decoration: none; color: #fff;
+        }
+
+        nav { display: flex; gap: 30px; }
+        nav a {
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none; font-size: 13px; font-weight: 600;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+        nav a.active { color: var(--accent); }
+
+        .cart-status {
+            background: var(--accent);
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        /* --- СЕТКА ТОВАРОВ --- */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 5% 100px;
+        }
+
+        .page-title {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 40px;
+            letter-spacing: -2px;
+        }
+
+        .systems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+
+        .system-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 40px;
+            transition: 0.4s var(--apple-ease);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .system-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .system-img-placeholder {
+            width: 100%;
+            height: 250px;
+            background: #111;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.1);
+            font-weight: 800;
+        }
+
+        .system-tag {
+            color: var(--accent);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .system-name {
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 15px;
+        }
+
+        .specs {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+
+        .spec-item {
+            font-size: 13px;
+            opacity: 0.5;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .price-tag {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 25px;
+        }
+
+        .buy-btn {
+            width: 100%;
+            padding: 20px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .buy-btn:hover {
+            background: var(--accent);
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 500px) {
+            .systems-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="header-logo">LIQUID-PC</a>
+        <nav>
+            <a href="systems.html" class="active">SYSTEMS</a>
+            <a href="builder.html">BUILDER</a>
+            <a href="store.html">STORE</a>
+            <a href="account.html">ACCOUNT</a>
+        </nav>
+        <div class="cart-status" id="cart-counter">CART: 0</div>
+    </header>
+
+    <main class="container">
+        <h1 class="page-title">READY SYSTEMS</h1>
+
+        <div class="systems-grid">
+            <!-- Card 1 -->
+            <div class="system-card">
+                <div class="system-img-placeholder"></div>
+                <div class="system-tag">Ultimate Performance</div>
+                <h2 class="system-name">LIQUID A1</h2>
+                <div class="specs">
+                    <div class="spec-item"><span>GPU</span><span>RTX 4090 24GB</span></div>
+                    <div class="spec-item"><span>CPU</span><span>Core i9-14900KS</span></div>
+                    <div class="spec-item"><span>RAM</span><span>64GB DDR5 7200MHz</span></div>
+                </div>
+                <div class="price-tag">650 000 ₽</div>
+                <button class="buy-btn" onclick="addToCart('LIQUID A1', 650000)">ДОБАВИТЬ В КОРЗИНУ</button>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="system-card">
+                <div class="system-img-placeholder"></div>
+                <div class="system-tag">Pro Gaming</div>
+                <h2 class="system-name">NEON G7</h2>
+                <div class="specs">
+                    <div class="spec-item"><span>GPU</span><span>RTX 4080 Super</span></div>
+                    <div class="spec-item"><span>CPU</span><span>Core i7-14700K</span></div>
+                    <div class="spec-item"><span>RAM</span><span>32GB DDR5 6000MHz</span></div>
+                </div>
+                <div class="price-tag">420 000 ₽</div>
+                <button class="buy-btn" onclick="addToCart('NEON G7', 420000)">ДОБАВИТЬ В КОРЗИНУ</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Функция обновления счетчика корзины
+        function updateCartCounter() {
+            const count = localStorage.getItem('cart_count') || 0;
+            document.getElementById('cart-counter').innerText = `CART: ${count}`;
+        }
+
+        // Функция добавления товара
+        function addToCart(name, price) {
+            let currentCount = parseInt(localStorage.getItem('cart_count')) || 0;
+            localStorage.setItem('cart_count', currentCount + 1);
+            
+            // Можно также сохранять массив товаров для страницы аккаунта
+            let items = JSON.parse(localStorage.getItem('cart_items')) || [];
+            items.push({ name, price, date: new Date().toLocaleDateString() });
+            localStorage.setItem('cart_items', JSON.stringify(items));
+
+            updateCartCounter();
+            
+            // Простая визуальная обратная связь
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "ДОБАВЛЕНО!";
+            btn.style.background = "#00f0ff";
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.background = "#fff";
+            }, 1000);
+        }
+
+        // Инициализация счетчика при загрузке
+        updateCartCounter();
+    </script>
+</body>
+</html>

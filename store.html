@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store | Liquid-PC</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap');
+
+        :root {
+            --bg: #000000;
+            --accent: #00f0ff;
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-hover: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.1);
+            --apple-ease: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: #fff; min-height: 100vh; overflow-x: hidden; }
+
+        /* --- HEADER --- */
+        header {
+            position: fixed; top: 0; width: 100%; height: 80px; padding: 0 5%;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(30px); z-index: 999;
+            border-bottom: 1px solid var(--border);
+        }
+        .header-logo { font-weight: 900; font-size: 22px; letter-spacing: 2px; text-decoration: none; color: #fff; }
+        nav { display: flex; gap: 30px; }
+        nav a { color: rgba(255, 255, 255, 0.5); text-decoration: none; font-size: 13px; font-weight: 600; text-transform: uppercase; transition: 0.3s; }
+        nav a.active { color: var(--accent); }
+
+        /* --- CONTENT --- */
+        .container { max-width: 1400px; margin: 0 auto; padding: 140px 5% 100px; }
+        
+        .section-header { margin-bottom: 60px; }
+        .section-header h1 { font-size: 64px; font-weight: 900; letter-spacing: -4px; margin-bottom: 10px; }
+        
+        .filter-bar {
+            display: flex; gap: 15px; margin-bottom: 40px; overflow-x: auto; padding-bottom: 10px;
+        }
+        .filter-btn {
+            background: var(--surface); border: 1px solid var(--border); color: #fff;
+            padding: 12px 24px; border-radius: 30px; cursor: pointer; white-space: nowrap;
+            font-size: 12px; font-weight: 700; text-transform: uppercase; transition: 0.3s;
+        }
+        .filter-btn:hover, .filter-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+        .products-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;
+        }
+
+        .product-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 30px; padding: 25px; transition: 0.5s var(--apple-ease);
+            display: flex; flex-direction: column; position: relative; overflow: hidden;
+        }
+        .product-card:hover { transform: translateY(-10px); border-color: var(--accent); background: var(--surface-hover); }
+        
+        .product-img {
+            width: 100%; aspect-ratio: 1; background: rgba(255,255,255,0.02);
+            border-radius: 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px;
+        }
+
+        .product-cat { font-size: 10px; color: var(--accent); font-weight: 800; text-transform: uppercase; margin-bottom: 8px; }
+        .product-name { font-size: 18px; font-weight: 700; margin-bottom: 15px; line-height: 1.2; height: 44px; overflow: hidden; }
+        
+        .product-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+        .product-price { font-size: 22px; font-weight: 900; letter-spacing: -1px; }
+        
+        .buy-btn {
+            background: #fff; color: #000; border: none; width: 45px; height: 45px;
+            border-radius: 15px; font-size: 20px; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .buy-btn:hover { background: var(--accent); transform: rotate(90deg); }
+
+        /* --- CART NOTIFICATION --- */
+        #notification {
+            position: fixed; bottom: 30px; right: 30px; background: var(--accent); color: #000;
+            padding: 20px 40px; border-radius: 20px; font-weight: 900; transform: translateY(200%);
+            transition: 0.5s var(--apple-ease); z-index: 1000; box-shadow: 0 10px 40px rgba(0,240,255,0.3);
+        }
+        #notification.show { transform: translateY(0); }
+
+        @media (max-width: 768px) {
+            .section-header h1 { font-size: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="header-logo">LIQUID-PC</a>
+        <nav>
+            <a href="systems.html">SYSTEMS</a>
+            <a href="builder.html">BUILDER</a>
+            <a href="store.html" class="active">STORE</a>
+            <a href="account.html">ACCOUNT</a>
+        </nav>
+        <div id="cart-counter" style="background: var(--accent); color:#000; padding: 5px 15px; border-radius: 20px; font-size: 11px; font-weight: 900;">CART: 0</div>
+    </header>
+
+    <main class="container">
+        <div class="section-header">
+            <h1>STORE</h1>
+            <p style="opacity: 0.5; max-width: 600px;">Премиальная периферия и оборудование для вашего сетапа. Только лучшее, проверенное инженерами Liquid.</p>
+        </div>
+
+        <div class="filter-bar">
+            <button class="filter-btn active" onclick="filterProducts('all')">Все товары</button>
+            <button class="filter-btn" onclick="filterProducts('monitor')">Мониторы</button>
+            <button class="filter-btn" onclick="filterProducts('mouse')">Мыши</button>
+            <button class="filter-btn" onclick="filterProducts('keyboard')">Клавиатуры</button>
+            <button class="filter-btn" onclick="filterProducts('audio')">Аудио</button>
+            <button class="filter-btn" onclick="filterProducts('chair')">Кресла</button>
+        </div>
+
+        <div class="products-grid" id="product-container">
+            <!-- Products injected here -->
+        </div>
+    </main>
+
+    <div id="notification">ТОВАР ДОБАВЛЕН В КОРЗИНУ</div>
+
+    <script>
+        const PROFIT_MARGIN = 1.05;
+
+        const products = [
+            { id: 1, cat: 'monitor', name: 'ASUS ROG Swift OLED PG32UCDM (240Hz)', price: 165000 },
+            { id: 2, cat: 'monitor', name: 'Samsung Odyssey Neo G9 G95NC (57")', price: 245000 },
+            { id: 3, cat: 'monitor', name: 'Alienware AW3423DWF QD-OLED', price: 115000 },
+            { id: 4, cat: 'monitor', name: 'LG UltraGear 27GR95QE OLED', price: 92000 },
+            { id: 5, cat: 'mouse', name: 'Logitech G Pro X Superlight 2 Dex', price: 19500 },
+            { id: 6, cat: 'mouse', name: 'Razer DeathAdder V3 Pro (8K Polling)', price: 17800 },
+            { id: 7, cat: 'mouse', name: 'Finalmouse UltralightX Guardian', price: 28000 },
+            { id: 8, cat: 'mouse', name: 'SteelSeries Aerox 3 Wireless', price: 11500 },
+            { id: 9, cat: 'keyboard', name: 'Wooting 80HE (Hall Effect)', price: 34000 },
+            { id: 10, cat: 'keyboard', name: 'ASUS ROG Azoth Extreme', price: 58000 },
+            { id: 11, cat: 'keyboard', name: 'Razer Huntsman V3 Pro TKL', price: 26500 },
+            { id: 12, cat: 'keyboard', name: 'Logitech G915 X LIGHTSPEED', price: 24000 },
+            { id: 13, cat: 'audio', name: 'SteelSeries Arctis Nova Pro Wireless', price: 42000 },
+            { id: 14, cat: 'audio', name: 'Audeze Maxwell (Planar Magnetic)', price: 38000 },
+            { id: 15, cat: 'audio', name: 'Sennheiser HD 800 S', price: 185000 },
+            { id: 16, cat: 'audio', name: 'Sony WH-1000XM5 Black', price: 36000 },
+            { id: 17, cat: 'chair', name: 'Herman Miller Embody Gaming', price: 215000 },
+            { id: 18, cat: 'chair', name: 'Secretlab TITAN EVO Series', price: 68000 },
+            { id: 19, cat: 'chair', name: 'Noblechairs EPIC Real Leather', price: 74000 },
+            { id: 20, cat: 'chair', name: 'Razer Iskur V2', price: 59000 },
+            { id: 21, cat: 'monitor', name: 'MSI MPG 271QRX QD-OLED', price: 88000 },
+            { id: 22, cat: 'audio', name: 'GOXLR Audio Mixer Interface', price: 45000 },
+            { id: 23, cat: 'keyboard', name: 'Keychron Q1 Max (Custom Build)', price: 29000 },
+            { id: 24, cat: 'mouse', name: 'ZOWIE EC2-CW Wireless', price: 16500 }
+        ];
+
+        function renderProducts(filter = 'all') {
+            const container = document.getElementById('product-container');
+            container.innerHTML = '';
+            
+            const filtered = filter === 'all' ? products : products.filter(p => p.cat === filter);
+
+            filtered.forEach(p => {
+                const finalPrice = Math.ceil(p.price * PROFIT_MARGIN);
+                container.innerHTML += `
+                    <div class="product-card">
+                        <div class="product-img"></div>
+                        <div class="product-cat">${p.cat}</div>
+                        <div class="product-name">${p.name}</div>
+                        <div class="product-footer">
+                            <div class="product-price">${finalPrice.toLocaleString()} ₽</div>
+                            <button class="buy-btn" onclick="addToCart('${p.name}', ${finalPrice})">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function filterProducts(cat) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderProducts(cat);
+        }
+
+        function addToCart(name, price) {
+            let items = JSON.parse(localStorage.getItem('cart_items')) || [];
+            items.push({ name, price: price.toLocaleString() + ' ₽', date: new Date().toLocaleTimeString() });
+            localStorage.setItem('cart_items', JSON.stringify(items));
+            localStorage.setItem('cart_count', items.length);
+            
+            document.getElementById('cart-counter').innerText = `CART: ${items.length}`;
+            
+            const note = document.getElementById('notification');
+            note.classList.add('show');
+            setTimeout(() => note.classList.remove('show'), 2000);
+        }
+
+        window.onload = () => {
+            renderProducts();
+            const count = localStorage.getItem('cart_count') || 0;
+            document.getElementById('cart-counter').innerText = `CART: ${count}`;
+        };
+    </script>
+</body>
+</html>
