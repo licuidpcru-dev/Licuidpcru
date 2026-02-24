@@ -27,7 +27,7 @@
             position: fixed; inset: 0; background: #000; z-index: 10000;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
-        #loader.hidden { transform: translateY(-100%); transition: 0.8s var(--apple-ease); }
+        #loader.hidden { transform: translateY(-100%); transition: 0.8s var(--apple-ease); pointer-events: none; }
         .loader-bar { width: 280px; height: 2px; background: rgba(255,255,255,0.1); position: relative; overflow: hidden; margin-top: 20px; }
         .loader-progress { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); width: 0%; transition: 0.4s; }
         .loader-text { font-size: 10px; font-weight: 900; letter-spacing: 5px; color: var(--accent); text-transform: uppercase; }
@@ -89,6 +89,7 @@
             padding: 14px; border-radius: 18px; font-size: 11px;
             font-weight: 800; text-transform: uppercase; margin-bottom: 25px;
             width: 100%; justify-content: center; text-align: center;
+            transition: 0.3s;
         }
         .comp-ok { background: rgba(52, 199, 89, 0.1); color: var(--success); border: 1px solid var(--success); }
         .comp-err { background: rgba(255, 59, 48, 0.1); color: var(--error); border: 1px solid var(--error); }
@@ -139,7 +140,7 @@
                 <div class="total-price" id="total-display">0 ₽</div>
                 
                 <div id="comp-status" class="compatibility-badge comp-ok">
-                    <span id="comp-text">Анализ...</span>
+                    <span id="comp-text">ОЖИДАНИЕ ВЫБОРА...</span>
                 </div>
 
                 <button class="add-btn" id="add-to-cart-btn" onclick="addToCart()">В корзину</button>
@@ -149,7 +150,6 @@
     </main>
 
     <script>
-        // Применяем наценку 5%
         const PROFIT_MARGIN = 1.05;
         const ASSEMBLY_FEE = 15000;
 
@@ -297,8 +297,10 @@
             const interval = setInterval(() => {
                 if (i >= steps.length) {
                     clearInterval(interval);
-                    document.getElementById('loader').classList.add('hidden');
-                    document.body.classList.add('loaded');
+                    setTimeout(() => {
+                        document.getElementById('loader').classList.add('hidden');
+                        document.body.classList.add('loaded');
+                    }, 400);
                     return;
                 }
                 bar.style.width = steps[i].p + '%';
@@ -322,8 +324,4 @@
                                     <span class="opt-price">${Math.ceil(it.price * PROFIT_MARGIN).toLocaleString()} ₽</span>
                                 </div>
                             `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-            generateDefaultBu
+               
